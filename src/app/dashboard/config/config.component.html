@@ -1,0 +1,191 @@
+<toaster-container [toasterconfig]="config"></toaster-container>
+<div class="container" style="height: 100%; overflow-x: hidden;">
+	<div class="row animate flex-items-xs-between" style="padding-top: 15px;">
+		<div class="col-lg-7">
+			<div class="card info-card disabled-card" pTooltip="soon"></div>
+			<div class="card info-card">
+				<div class="card-header title">
+					Advanced Options
+				</div>
+				<div class="card-block">
+					<div class="info2">Connect to another chain or testnet.</div>
+					<div class="card chains-card">
+						<div class="card-block chain-section selected chain-title-section">
+							Mainnet
+							<span style="float:right">endpoint: {{network.selectedEndpoint.getValue().url}} | latency: {{network.selectedEndpoint.getValue().latency}}ms</span>
+						</div>
+						<div class="card-block chain-section" (click)="confirmModal = true">
+							Jungle testnet
+							<span style="float:right">endpoint</span>
+						</div>
+					</div>
+					<button class="btn btn-info-outline mt-1" (click)="endpointModal = true">Other</button>
+				</div>
+			</div>
+		</div>
+		<div class="col-lg-5">
+			<div class="card info-card">
+				<div class="card-header title">
+					Logout Options
+				</div>
+				<div class="card-block">
+					<!--<button class="btn btn-info-outline">Logout</button>-->
+					<!--<div class="info">*Your data will still be saved in this PC. Your account will appear in the login page, should you want to login again, just put your password.</div>-->
+					<button class="btn btn-info-outline" (click)="logoutModal = true">Clear local data and logout</button>
+					<div class="info">*Your data will be cleared from this PC. Should you want to login again, you will have to import your private key again.
+					</div>
+				</div>
+			</div>
+			<div class="card info-card">
+				<div class="card-header title">
+					Lockscreen Pin &nbsp;
+					<a role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-right">
+						<fa-icon [icon]="['far','question-circle']" class="blue" style="font-size: 16px;"></fa-icon>
+						<span class="tooltip-content">Small security pin
+							<br> used to unlock the screen.
+						</span>
+					</a>
+				</div>
+				<div class="card-block">
+					<button class="btn btn-info-outline" (click)="pinModal = true">SET PIN</button>
+					<button class="btn btn-danger-outline" (click)="clearPinModal = true">REMOVE lOCKSCREEN</button>
+				</div>
+			</div>
+			<div class="card info-card">
+				<div class="card-header title">
+					Change Password &nbsp;
+					<a role="tooltip" aria-haspopup="true" class="tooltip tooltip-md tooltip-right">
+						<fa-icon [icon]="['far','question-circle']" class="blue" style="font-size: 16px;"></fa-icon>
+						<span class="tooltip-content">Password used to
+							<br> make transactions / actions.
+						</span>
+					</a>
+				</div>
+				<div class="card-block">
+					<button class="btn btn-info-outline" (click)="changePassModal = true">CHANGE</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<clr-modal [(clrModalOpen)]="logoutModal" [clrModalSize]="'sm'">
+	<h3 class="modal-title">
+		<span class="blue">Are you sure ?</span>
+	</h3>
+	<div class="modal-body">
+		<p style="margin-bottom: 20px;">All your data will be lost. If you want to login again you will have to import your private key again.</p>
+		<mat-checkbox [(ngModel)]="clearContacts">Also clear contacts on logout</mat-checkbox>
+	</div>
+	<div class="modal-footer">
+		<button class="btn btn-danger-outline" (click)="logoutModal = false">Cancel</button>
+		<div>
+			<button type="button" class="btn btn-info-outline" (click)="logout()">
+				Yes
+			</button>
+			<div class="text-center">*Hilarium will
+				<br> be restarted</div>
+		</div>
+	</div>
+</clr-modal>
+
+<clr-modal [(clrModalOpen)]="endpointModal" [clrModalSize]="'sm'">
+	<h3 class="modal-title text-white">
+		Place the endpoint yow want to connect to below
+	</h3>
+	<div class="modal-body">
+		<mat-form-field>
+			<input matInput type="text" placeholder="endpoint">
+		</mat-form-field>
+	</div>
+	<div class="modal-footer" style="padding: 0.5rem 0 0 0;">
+		<button type="button" class="btn btn-info-outline" (click)="endpointModal = false">
+			Connect
+		</button>
+	</div>
+</clr-modal>
+
+<clr-modal [(clrModalOpen)]="confirmModal" [clrModalSize]="'sm'">
+	<h3 class="modal-title text-white">
+		Connect to
+		<span class="blue">Jungle Testnet</span> ?
+	</h3>
+	<div class="modal-body">
+	</div>
+	<div class="modal-footer">
+		<button type="button" class="btn btn-info-outline">
+			Connect
+		</button>
+		<button class="btn btn-danger-outline" (click)="confirmModal = false">Cancel</button>
+	</div>
+</clr-modal>
+
+<clr-modal [(clrModalOpen)]="changePassModal" [clrModalSize]="'md'">
+	<h3 class="modal-title text-white" style="color:#535353 !important;">
+		<fa-icon [icon]="['fas','key']"></fa-icon>&nbsp;&nbsp;Change Password
+	</h3>
+	<div class="modal-body">
+		<form [formGroup]="passForm">
+			<mat-form-field class="mt-1">
+				<input matInput type="password" placeholder="Old password" formControlName="oldpass">
+			</mat-form-field>
+			<mat-form-field class="mt-1">
+				<input matInput #pass type="password" placeholder="New password" (blur)="passCompare()" [formControl]="passForm['controls'].matchingPassword['controls']['pass1']">
+				<mat-hint style="color:#535353 !important;" align="start">
+					Min 10 characters
+				</mat-hint>
+				<mat-hint align="end" style="color:#535353 !important;">{{pass.value.length}} / 10+</mat-hint>
+			</mat-form-field>
+			<mat-form-field style="margin-top: 19px">
+				<input matInput type="password" placeholder="Confirm password" (blur)="passCompare()" [formControl]="passForm['controls'].matchingPassword['controls']['pass2']">
+				<mat-error style="color:red !important;" *ngIf="!passmatch">
+					Passwords do not match!
+				</mat-error>
+			</mat-form-field>
+		</form>
+	</div>
+	<div class="modal-footer" style="padding: 0.5rem 0 0 0;">
+		<button type="submit" class="btn btn-info-outline" (click)="changePass()" [disabled]="!passForm.valid">
+			Change and Restart hila
+		</button>
+	</div>
+</clr-modal>
+
+<clr-modal [(clrModalOpen)]="pinModal" [clrModalSize]="'sm'">
+	<h3 class="modal-title text-white" style="color: #535353 !important;">
+		Set lockscreen pin
+	</h3>
+	<div class="modal-body" style="overflow-y: -webkit-paged-x !important;">
+		<form [formGroup]="pinForm">
+			<mat-form-field class="mt-1">
+				<input matInput #pin type="password" placeholder="New pin" formControlName="pin">
+				<fa-icon matSuffix *ngIf="pin.type === 'password'" [icon]="['far', 'eye']" size="lg" class="copy" (click)="pin.type = 'text'" style="color: #535353"></fa-icon>
+				<fa-icon matSuffix *ngIf="pin.type === 'text'" [icon]="['far', 'eye-slash']" size="lg" class="copy" (click)="pin.type = 'password'" style="color: #235d8d"></fa-icon>
+				<mat-hint  style="color:#535353 !important;" align="start">
+					This pin can be anything you want
+				</mat-hint>
+			</mat-form-field>
+		</form>
+	</div>
+	<div class="modal-footer">
+		<button type="button" (click)="setPIN()" class="btn btn-info-outline" [disabled]="!pinForm.valid">
+			Set pin
+		</button>
+	</div>
+</clr-modal>
+
+<clr-modal [(clrModalOpen)]="clearPinModal" [clrModalSize]="'sm'">
+	<h3 class="modal-title">
+		<span class="blue">Are you sure ?</span>
+	</h3>
+	<div class="modal-body">
+		<p style="margin-bottom: 20px;">If you remove the lockscreen, your balance will be displayed when opening the wallet
+		</p>
+	</div>
+	<div class="modal-footer">
+		<button class="btn btn-danger-outline" (click)="clearPinModal = false">Cancel</button>
+		<button type="button" class="btn btn-info-outline" (click)="clearPin()">
+			Yes
+		</button>
+	</div>
+</clr-modal>

@@ -1,0 +1,202 @@
+<toaster-container [toasterconfig]="config"></toaster-container>
+<div class="container-fluid" style="overflow:hidden;">
+  <div class="row flex-items-xs-between send-row">
+    <div class="col-md-6 text-center animate" style="align-self: center;">
+      <div class="content-area" style="padding-top: 0; overflow-x: hidden;">
+        <div class="balance" style="color: rgba(255,255,255,0.8);">
+          <ng-container *ngIf="sendForm.value.token === 'EOS'">
+            <fa-icon [icon]="['far', 'lock-open']"></fa-icon>&nbsp;FREE (${{unstaked * aService.usd_rate | number :
+            '1.2-2'}})
+          </ng-container>
+          <ng-container *ngIf="sendForm.value.token !== 'EOS' && selectedToken.price !== null">
+            ${{token_balance * selectedToken.price | number :'1.2-2'}}
+          </ng-container>
+        </div>
+        <ng-container *ngIf="sendForm.value.token === 'EOS'">
+          <div class="eos">{{unstaked | number : '1.2-4'}} EOS</div>
+          <div *ngIf="(staked + unstaking) > 0">
+            <fa-icon [icon]="['far', 'lock']"></fa-icon>&nbsp;Will be {{(staked + unstaking) | number :
+            '1.2-4'}} EOS {{unstakeTime}}
+          </div>
+        </ng-container>
+        <ng-container *ngIf="sendForm.value.token !== 'EOS'">
+          <div class="eos">{{token_balance | number : '1.2-4'}} {{sendForm.value.token}}</div>
+        </ng-container>
+        <form [formGroup]="sendForm">
+          <div>
+            <mat-form-field class="example-full-width">
+              <input type="text" class="text-xanh" placeholder="Token" matInput formControlName="token" [matAutocomplete]="auto1">
+              <fa-icon matSuffix [icon]="['fas', 'caret-down']"></fa-icon>
+              <mat-autocomplete #auto1="matAutocomplete">
+                <mat-option value="EOS">
+                  EOS
+                </mat-option>
+                <mat-option *ngFor="let token of aService.tokens" [value]="token.name">
+                  {{ token.name }}
+                </mat-option>
+              </mat-autocomplete>
+            </mat-form-field>
+            <mat-form-field class="field-width" style="margin-top: 12px; margin-bottom: 12px">
+              <input #toAccount matInput type="text" formControlName="to"
+                     placeholder="Send to (account name)" maxlength="12" class="text-xanh"
+                     [matAutocomplete]="auto" (blur)="checkContact(toAccount.value); checkAccountName();">
+              <mat-error align="start" *ngIf="errormsg !== ''">
+                {{errormsg}}
+              </mat-error>
+              <mat-hint align="end">{{toAccount.value.length}} / 12</mat-hint>
+              <mat-autocomplete #auto="matAutocomplete">
+                <mat-option *ngFor="let contact of filteredContacts | async; let last = last"
+                            [value]="contact.account" [class.last]="last">
+                  <div class="name">{{ contact.name }}</div>
+                  <div class="account">{{ contact.account }}</div>
+                </mat-option>
+              </mat-autocomplete>
+            </mat-form-field>
+            <mat-form-field class="field-width">
+              <input matInput formControlName="amount" class="text-xanh" [textMask]="{mask: numberMask}" type="text"
+                     placeholder="Amount ({{selectedToken.name}})" (blur)="checkAmount();">
+              <button mat-button matSuffix mat-icon-button class="btn btn-inverse btn-sm btn-max"
+                      (click)="setMax()">
+                MAX
+              </button>
+              <mat-error align="start" *ngIf="amounterror !== ''">
+                {{amounterror}}
+              </mat-error>
+            </mat-form-field>
+            <mat-form-field class="field-width" style="margin-bottom: 12px;">
+              <input class="text-xanh" matInput #message maxlength="256" formControlName="memo" type="text"
+                     placeholder="Memo (optional)">
+              <mat-hint align="end">{{message.value.length}} / 256</mat-hint>
+            </mat-form-field>
+          </div>
+          <ng-container *ngIf="!contactExist && errormsg === ''">
+            <div class="gray" style="margin-top: 6px">This account is not yet in your contacts</div>
+            <div class="toggle-switch text-left">
+              <input type="checkbox" id="addtoContacts" formControlName="add">
+              <label for="addtoContacts" class="gray">Add to contacts?</label>
+            </div>
+            <mat-form-field class="alias" *ngIf="add">
+              <input matInput formControlName="alias" type="text" placeholder="Contact name">
+            </mat-form-field>
+          </ng-container>
+          <button class="btn btn-block btn-info-outline" (click)="openSendModal()"
+                  [disabled]="!sendForm.valid">
+            <fa-icon [icon]="['far', 'paper-plane']"></fa-icon>&nbsp;&nbsp;SEND
+          </button>
+        </form>
+      </div>
+    </div>
+    <div class="col-md-6 contacts-panel flex-nowrap">
+      <div class="row flex-items-xs-between contacts-pad contacts-panel-header">
+        <div class="col-xs-6"><h1 class="mt-0" style="color:#fff !important;text-align: center;">My Contacts</h1></div>
+        <div class="col-xs-6">
+          <form [formGroup]="searchForm" class="searchform">
+            <mat-form-field class="example-full-width" style="color: #fff !important;">
+              <input type="text" matInput placeholder="Search..." formControlName="search" style="color: #fff !important;">
+              <fa-icon matSuffix [icon]="['far', 'search']" size="lg" style="color: #fff !important;"></fa-icon>
+            </mat-form-field>
+          </form>
+        </div>
+      </div>
+      <div class="contacts-panel-body">
+
+        <div class="contacts-pad" style="font-size: 17px;" *ngIf="contacts.length === 0">
+          You don't have any contacts yet :(
+        </div>
+
+        <div class="contacts-pad" style="font-size: 17px;" *ngIf="noResultSearch === true">
+          Not find any results :(
+        </div>
+
+        <ng-container *ngFor="let contact of searchedContacts | async; let last = last">
+          <div class="row letter-divider" *ngIf="contact.type === 'letter'">
+            <div class="col-xs-12"><h5 class="mt-0 letter">{{contact.name}}</h5></div>
+          </div>
+          <ul *ngIf="contact.type === 'contact'" (click)="selectContact(contact)">
+            <li class="contacts-pad" [class.last-item]="last">
+              <h5 class="gray mt-0">{{contact.name}}</h5>
+              <div>{{contact.account}}</div>
+            </li>
+          </ul>
+        </ng-container>
+      </div>
+      <div class="contacts-panel-footer">
+        <button class="btn btn-inverse btn-block newContactBtn" (click)="newContactModal = true">
+          <fa-icon [icon]="['far', 'plus']"></fa-icon>&nbsp;&nbsp;NEW CONTACT
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<clr-modal [(clrModalOpen)]="sendModal">
+  <h3 class="modal-title text-white" style="color: #535353 !important;"><span class="blue">{{ fromAccount }}</span> sends <span class="blue">{{ sendForm.value.amount | number : '1.2-4' }} {{sendForm.value.token}}</span>
+    to
+  </h3>
+  <div class="modal-body">
+    <h3 class="blue">{{ sendForm.value.to }}</h3>
+    <h5 class="mt-0" *ngIf="sendForm.value.alias !== ''">{{ sendForm.value.alias }}</h5>
+    <p-accordion *ngIf="sendForm.value.token === 'EOS'">
+      <p-accordionTab header="By submiting this transaction, you agree to the EOS Transfer Terms & Conditions">
+        I, {{fromAccount}}, certify the following to be true to the best of my knowledge:
+        <br><br>
+        &#9; 1. I certify that {{sendForm.value.amount | number : '1.2-4'}} EOS is not the proceeds of fraudulent or
+        violent activities.<br>
+        2. I certify that, to the best of my knowledge, {{sendForm.value.to}} is not supporting initiation of violence
+        against others.<br>
+        3. I have disclosed any contractual terms & conditions with respect to {{sendForm.value.amount | number :
+        '1.2-4'}} EOS to {{sendForm.value.to}}.<br>
+        4. I understand that funds transfers are not reversible after the seconds or other delay as configured by
+        {{fromAccount}}'s permissions.<br>
+        <br><br>
+        If this action fails to be irreversibly confirmed after receiving goods or services from
+        '{{sendForm.value.to}}', I agree to either return the goods or services or resend {{sendForm.value.amount |
+        number : '1.2-4'}} EOS in a timely manner.
+      </p-accordionTab>
+    </p-accordion>
+  </div>
+  <div class="modal-footer">
+    <form [formGroup]="confirmForm" class="confirmForm">
+      <mat-form-field>
+        <input matInput #pass type="password" (keyup.enter)="transfer()" placeholder="Password" formControlName="pass" style="color: #535353 !important;">
+        <mat-hint class="error" align="start" *ngIf="wrongpass !== ''">
+          {{wrongpass}}
+        </mat-hint>
+        <br clear="all"/>
+      </mat-form-field>
+      <button type="button" class="btn btn-info-outline" style="margin-top: 12px;" (click)="transfer()"
+              [disabled]="!confirmForm.valid || busy">
+        Confirm
+        <fa-icon [icon]="['far','spinner']" [spin]="true" *ngIf="busy"></fa-icon>
+      </button>
+    </form>
+  </div>
+</clr-modal>
+
+
+<clr-modal [(clrModalOpen)]="newContactModal" [clrModalSize]="'sm'">
+  <h3 class="modal-title text-white" style="color: #535353 !important">
+    <fa-icon [icon]="['far', 'user-plus']"></fa-icon>&nbsp;&nbsp;New contact
+  </h3>
+  <div class="modal-body">
+    <form [formGroup]="contactForm" style="width: 100%;">
+      <mat-form-field>
+        <input matInput #addAccount type="text" formControlName="account" placeholder="EOS Account name"
+               class="text-xanh" maxlength="12" (blur)="checkAccountModal()" style="color: #535353 !important;">
+        <mat-error align="start" *ngIf="adderrormsg !== ''">
+          {{adderrormsg}}
+        </mat-error>
+        <mat-hint align="end">{{addAccount.value.length}} / 12</mat-hint>
+      </mat-form-field>
+      <mat-form-field>
+        <input matInput type="text" formControlName="name" placeholder="Contact name">
+      </mat-form-field>
+    </form>
+  </div>
+  <div class="modal-footer" style="padding: 0.5rem 0 0 0;">
+    <button type="submit" class="btn btn-info-outline" (click)="addContact()" [disabled]="!contactForm.valid">
+      Add
+    </button>
+  </div>
+</clr-modal>

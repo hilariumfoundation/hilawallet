@@ -1,0 +1,159 @@
+.container-fluid, .send-row {
+    height: 100%;
+}
+
+.balance {
+    font-size: 21px;
+    margin-bottom: 19px;
+}
+
+.eos {
+    font-size: 46px;
+    margin-bottom: 19px;
+    color:rgb(49, 161, 218);
+}
+
+.dollar {
+    font-size: 26px;
+}
+
+/deep/ .mat-form-field {
+    display: block !important;
+}
+.mat-form-field {
+    margin-bottom: 10px;
+}
+.field-width {
+    /*width: 100%;*/
+    width: 262px;
+}
+
+form {
+    display: inline-block;
+}
+
+/deep/ .mat-form-field-appearance-legacy .mat-hint {
+    color: #fff;
+}
+
+/*contact's panel*/
+.contacts-pad {
+    padding: 1rem 1rem 0.7rem 1rem;
+}
+
+.letter-divider {
+    border-bottom: 1px solid rgba(255,255,255,0.3);
+    border-top: 1px solid rgba(255,255,255,0.3);
+}
+
+.letter {
+    color: #e3e3e3;
+    padding-left: 0.5rem;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+li {
+    list-style-type: none;
+    border-bottom: 1px solid #3f3f3f;
+    cursor: pointer;
+}
+
+li:hover {
+    background-color: #1f1f1f;
+    -webkit-transition-duration: 0.3s;
+    transition-duration: 0.3s;
+    -webkit-transition-property: background-color;
+    transition-property: background-color;
+}
+
+.last-item {
+    border-bottom: none;
+}
+
+.contacts-panel {
+    display: flex;
+    flex-direction: column;
+    padding-left: 0;
+    padding-right: 0;
+    max-height: 100%;
+}
+
+.contacts-panel-header {
+    margin-left: 0;
+    margin-right: 0;
+    border-bottom: 1px solid #fff;
+    opacity: 0.4;
+    background-color: #000;
+}
+
+.contacts-panel-body {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background-color: rgba(0,0,0,0.4) !important;
+}
+
+.newContactBtn {
+    background-color:#235d8d;
+    border-bottom: 0;
+    border-left: 0;
+    border-right: 0;
+    border-radius: 0;
+    border-top: none;
+    margin-bottom: 0;
+    margin-top: 0 !important;
+}
+/*contact's panel end*/
+
+.mat-option {
+    line-height: 24px;
+    height: 54px;
+    padding: 30px 16px;
+}
+
+.name {
+    color: white;
+}
+
+.account {
+    font-size: 14px;
+}
+
+mat-option:not(.last) {
+    border-bottom: 1px solid rgba(255,255,255,0.3) !important;
+}
+
+/deep/ .mat-autocomplete-panel .mat-option.mat-selected:not(.mat-active):not(:hover) {
+    background: #3a3a3a;
+}
+.mat-autocomplete-panel .mat-option.mat-selected:not(.mat-active):not(:hover) {
+    background: #235d8d !important;
+}
+.btn.btn-inverse:hover {
+    opacity: 0.8 !important;
+}
+.btn-max {
+    margin: -10px 0 .25rem 0;
+    min-width: unset;
+}
+
+.searchform {
+    padding-top: 0;
+    width: 100%;
+}
+
+.confirmForm {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 0;
+}
+.ui-state-default a {
+    color: #191919;
+  }
+.error {
+    color: #f44336;
+}
+.ui-accordion .ui-accordion-header:not(.ui-state-active):not(.ui-state-disabled):hover a {
+    color: #d1d1d1;
+}
